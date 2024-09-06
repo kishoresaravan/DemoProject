@@ -32,3 +32,11 @@ wrapper {
     gradleVersion = "7.3.3"
     distributionType = Wrapper.DistributionType.ALL
 }
+task releaseTar(type: Tar) {
+    archiveBaseName.set('sample') // Replace with your desired base name
+    archiveVersion.set(version)
+    destinationDirectory.set(file("$buildDir/distributions"))
+    from(sourceSets.main.output)
+}
+
+releaseTar.dependsOn(build)
