@@ -1,6 +1,5 @@
 apply plugin: 'java'
 apply plugin: 'maven-publish'
-apply plugin: 'org.cyclonedx.bom' version '1.8.1'
 
 group = 'com.demo'
 version = '2.0'
