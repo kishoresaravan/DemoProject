@@ -1,20 +1,39 @@
-plugins {
-    id 'java'
-    id 'maven-publish'
-    id 'org.cyclonedx.bom' version '1.8.1' 
-    id 'org.springframework.boot' version '3.1.6'
-    id 'io.spring.dependency-management' version '1.1.4'
+import org.apache.tools.ant.filters.ReplaceTokens
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        google()
+    }
+    dependencies {
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:3.1.6'
+        classpath 'com.google.gms:google-services:4.3.13'
+    }
 }
 
-group = 'com.demo'
-version = '2.0'
+plugins {
+    id 'org.springframework.boot' version '3.1.6'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'java'
+    id 'org.cyclonedx.bom' version '1.8.1'
+}
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+group = 'net.logicfocus.facimate'
+version = '1.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 repositories {
     mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+    google()
 }
+
 cyclonedxBom {
     includeConfigs = ["runtimeClasspath"]
     projectType = "application"
@@ -28,32 +47,126 @@ cyclonedxBom {
 }
 
 dependencies {
-    implementation 'com.google.guava:guava:29.0-jre'
-}
+    implementation project(':commons')
 
-java {
-    withSourcesJar()
-    withJavadocJar()
-}
+    implementation ('org.springframework.boot:spring-boot-starter-web') {
+        exclude group: 'org.yaml', module: 'snakeyaml'
+        exclude group: 'ch.qos.logback', module: 'logback-core'
+        exclude group: 'ch.qos.logback', module: 'logback-classic'
+    }
+    // https://mvnrepository.com/artifact/ch.qos.logback/logback-core
+    implementation 'ch.qos.logback:logback-core:1.4.14'
+    // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
+    implementation 'ch.qos.logback:logback-classic:1.4.14'
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from components.java
-        }
+    implementation ('org.springframework.boot:spring-boot-starter-security') {
+        exclude group: 'org.springframework.security', module: 'spring-security-crypto'
+    }
+
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-crypto
+    implementation 'org.springframework.security:spring-security-crypto:6.1.0'
+
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-thymeleaf
+    implementation ('org.springframework.boot:spring-boot-starter-thymeleaf')
+
+    // https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-mail
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '3.1.6'
+
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-freemarker
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-freemarker', version: '3.1.6'
+
+    implementation 'org.projectlombok:lombok:1.18.26'
+    implementation ('android.arch.work:work-runtime:1.0.1') {
+        exclude(group:'android.arch.persistence.room', module:'runtime')
+        exclude(group:'android.arch.lifecycle', module:'extensions')
+    }
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation platform('com.google.firebase:firebase-bom:31.2.0')
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // https://mvnrepository.com/artifact/org.modelmapper/modelmapper
+    implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.4.4'
+
+    implementation 'org.imgscalr:imgscalr-lib:4.2'
+    implementation 'commons-io:commons-io:2.11.0'
+
+    implementation 'org.apache.poi:poi-ooxml:5.2.2'
+    implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
+    implementation ('com.razorpay:razorpay-java:1.4.3') {
+        exclude group: 'org.json', module: 'json'
+        exclude group: 'com.squareup.okio', module: 'okio'
+    }
+    implementation 'org.json:json:20231013'
+    // https://mvnrepository.com/artifact/com.squareup.okio/okio
+    implementation 'com.squareup.okio:okio:3.4.0'
+    implementation 'org.yaml:snakeyaml:2.0'
+
+    implementation group: 'com.itextpdf', name: 'itextpdf', version: '5.5.13.3'
+    implementation ('com.google.firebase:firebase-admin:9.2.0'){
+        exclude group: 'com.google.guava', module: 'guava'
+    }
+    // https://mvnrepository.com/artifact/com.google.guava/guava
+    implementation 'com.google.guava:guava:32.1.2-jre'
+
+    // https://mvnrepository.com/artifact/javassist/javassist
+    implementation 'javassist:javassist:3.12.1.GA'
+
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+    // https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+
+    implementation 'org.xhtmlrenderer:flying-saucer-pdf:9.1.22'
+
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
 }
+test {useJUnitPlatform()}
 
-wrapper {
-    gradleVersion = "7.3.3" // Confirming the Gradle version is set to 7.3.3
-    distributionType = Wrapper.DistributionType.ALL
+def packageDistribution =copySpec {
+    def distroName = "$name-$version"
+    into(distroName) {
+
+        new File(buildDir, "$distroName/conf").mkdirs()
+        new File(buildDir, "$distroName/bin").mkdirs()
+        new File(buildDir, "$distroName/lib").mkdirs()
+        new File(buildDir, "$distroName/data").mkdirs()
+
+        into('lib') {
+            from 'build/libs'
+            include '*.jar' //copy the fat jar created by bootRepackage
+        }
+
+        into('bin') {
+            from 'src/templates'
+            include 'start*.template'
+            include 'stop*.template'
+            filter(ReplaceTokens, tokens: [
+                    name: project.name,
+                    extra_java_opts_property: project.name.replace('-','_').toUpperCase() + "_OPTS",
+                    extra_java_opts: ' -Dspring.config.location=$APP_HOME/conf/ -Dspring.profiles.active=$1',
+                    version: project.version,
+                    generated: new Date().toString()
+            ])
+            fileMode = 0755
+        }
+        into('conf') {
+            from "src/main/resources/" //custom start script based on startScripts task output
+            include '*.yml'
+        }
+        rename ("^start-facimate.sh.template\$","start-facimate.sh")
+        rename ("^stop-facimate.sh.template\$","stop-facimate.sh")
+    }
+
+
 }
 
-task releaseTar(type: Tar) {
-    archiveBaseName.set('sample') // Replace with your desired base name
-    archiveVersion.set(version)
-    destinationDirectory.set(file("$buildDir/distributions"))
-    from(sourceSets.main.output)
-}
-
-releaseTar.dependsOn(build)
+task releaseTar(type: Tar, dependsOn: ['build']) { with packageDistribution }
