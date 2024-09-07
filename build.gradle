@@ -1,37 +1,41 @@
-apply plugin: 'java'
-apply plugin: 'maven-publish'
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'org.cyclonedx.bom' version '1.8.1' // Updated CycloneDX plugin version
+}
 
 group = 'com.demo'
 version = '2.0'
 
-sourceCompatibility = 1.8 // java 8
+sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-  implementation 'com.google.guava:guava:29.0-jre'
+    implementation 'com.google.guava:guava:29.0-jre'
 }
 
 java {
-	withSourcesJar()
-	withJavadocJar()
+    withSourcesJar()
+    withJavadocJar()
 }
 
 publishing {
     publications {
         maven(MavenPublication) {
-		from components.java
+            from components.java
         }
     }
 }
 
 wrapper {
-    gradleVersion = "7.3.3"
+    gradleVersion = "7.3.3" // Confirming the Gradle version is set to 7.3.3
     distributionType = Wrapper.DistributionType.ALL
 }
+
 task releaseTar(type: Tar) {
     archiveBaseName.set('sample') // Replace with your desired base name
     archiveVersion.set(version)
